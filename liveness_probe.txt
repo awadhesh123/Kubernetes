@@ -1,0 +1,130 @@
+**********************************Liveness Probe***********************************
+
+Example.1
+
+vi liveness.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: mylivenessprobe
+spec:
+  containers:
+  - name: liveness
+    image: ubuntu
+    args:
+    - /bin/sh
+    - -c                                // will create container
+    - touch /tmp/healthy; sleep 1000    // will create the healthy folder on /tmp in container
+    livenessProbe:                                          
+      exec:
+        command:                                         
+        - cat                
+        - /tmp/healthy
+      initialDelaySeconds: 5             // it will start healthy check after 5 seconds 
+      periodSeconds: 5                   // it will monitor health every 5 seconds                      
+      timeoutSeconds: 30                 // if it will faile after 30 seconds then it will restart the pods.
+
+kubectl apply -f liveness.yml
+kubectl describe pods -podname           // read it carefully
+kubectl exec -it ..... /bin/bash
+   cat /tmp/healthy
+   echo $?
+   o                                      // 0 means success
+
+Now, delete /tmp/healthy
+cat /tmp/healthy
+echo $?
+1                                         // 1 mean fail
+exit
+
+#kubectl get pods
+#kubectl describe pod podname
+ in error:
+          container liveness failed
+#kubectl delete -f liveness.yml
+
+*********************************************************************************
+
+Example:2
+
+Pod with a Liveness Probe and No Restart Policy
+If we don’t specify the restart Policy then by default it is always
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: liveness-probe
+spec:
+  containers:
+  - name: ubuntu-container
+    image: ubuntu
+    command:
+        - /bin/bash
+        - -ec
+        - touch /tmp/live; sleep 30; rm /tmp/live; sleep 600
+    livenessProbe:
+       exec:
+         command:
+            - cat
+            - /tmp/live
+       initialDelaySeconds: 5
+       periodSeconds: 5
+
+
+Note:
+When container starts it will create a file /tmp/live then sleep for 30 seconds and at last remove the file /tmp/live
+This means the file will be available only for 30 seconds and after that it is no longer available in the container
+In liveness configuration — It will try to find the file every 5 seconds with an initial delay of 5 seconds
+
+kubectl create -f liveness-probe.yaml
+kubectl describe pod liveness-probe
+
+Now wait for 30 seconds and the run the below command
+#kubectl describe pod liveness-probe
+
+You will see that liveness-probe has failed
+
+Now you can see that container is restarting again and again because of the default Restart policy
+
+*************************************************************************************************************************************
+Creating a Pod Running a Container with a Liveness Probe and a Restart Policy
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: liveness-probe-never-restart
+spec:
+  restartPolicy: Never
+  containers:
+  - name: ubuntu-container
+    image: ubuntu
+    command:
+        - /bin/bash
+        - -ec
+        - touch /tmp/live; sleep 30; rm /tmp/live; sleep 100
+    livenessProbe:
+       exec:
+         command:
+            - cat
+            - /tmp/live
+       initialDelaySeconds: 5
+       periodSeconds: 5
+
+
+Create a pod
+
+kubectl create -f liveness-probe-with-restart-policy.yaml
+Wait for a minute and then run the below command
+
+kubectl describe pod liveness-probe-never-restart
+
+
+From the output you can see that controller killed the container and never attempted to restart the Pod.
+
+*****************************************************************************************************************************************
+Creating a Pod Running a Container with a Liveness Probe and a Restart Policy failure
+
+Example:

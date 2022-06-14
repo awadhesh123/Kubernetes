@@ -1,0 +1,73 @@
+Probes means investigations.
+
+There are three types of probes.
+Readiness probe
+Liveness probe
+Startup probes
+
+Note:
+Readiness fails then it will recreate the pods.
+Liveness failes then it will resrater the pods.
+
+
+1. Readiness Probe:
+A liveness probe checks if the container is properly running and, if the failure threshold has been reached, kills the container. In most cases, depending on the container’s restart policy, Kubernetes will automatically restart the failed container. We might want to use a liveness probe for a container that can fail with no possible recovery.
+
+
+2. Readiness probe
+A readiness probe checks if the container can respond to new requests. Unlike a liveness probe, a readiness probe doesn’t kill the container. Kubernetes simply hides the container’s Pod from corresponding Services, so that no traffic is redirected to it. 
+
+3. Startup probe
+A startup probe checks if the container has properly started. It has higher priority over the two other probe types, which are disabled by Kubernetes until the startup probe is successful, at which point they take over. Startup probes are useful in situations where your app can take a long time to start, or could occasionally fail on startup.
+
+***********************************************************************************************************************
+A probe/health check may return the following results:
+
+1.Success: The container passed the health check.
+2.Failure: The container failed the health check.
+3.Unknown: The health check failed for unknown reasons.
+
+************************************************************************************************************************
+Restart Policy:
+
+We can define the restart Policy in the pod to instruct the controller about the conditions required to restart the Pod
+
+Default value is always 
+
+Values for the Restart Policy as follows
+
+Always: Always restart the pod when it terminates.
+OnFailure: Restart the pod only when it terminates with failure.
+Never: Never restart the pod after it terminates.
+
+*************************************************************************************************************************
+Probes have common settings:
+
+initialDelaySeconds: how many seconds should pass before probes should be active
+periodSeconds: the probing frequency
+timeoutSeconds: the number of seconds after which the probe times out
+successThreshold: how many times should the probe succeed before the container should be seen as healthy
+failureThreshold: how many times should the probe fail before the container should be seen as failing
+
+**************************************************************************************************************************
+Few methods of Liveness Probes:
+
+1.HTTP request
+  This type of probe send request on the containers IP address, a port and path you specify
+> Probe is considered a failure and container will be automatically restarted if
+  > Probe recieves error respond code
+  > container app doesn't respond at all
+
+2.TCP Socket 
+  TCP socket probe tries to open aTCP connection to the specified port of the container.
+  > If connection established successfully , the probe is successfule
+  > Otherwie , the container is restarted.
+
+3.Exec prob
+  An exec probe executed some commands you rpovide inside the container and checks the command's exit status code.
+  > If the status code is 0, the probe is successful.
+  > All other codes are considered failures.
+
+4. Named port
+
+https://www.youtube.com/watch?v=lzV2htrx5-k&t=1090s

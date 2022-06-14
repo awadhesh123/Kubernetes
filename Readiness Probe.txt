@@ -1,0 +1,69 @@
+Readiness Probe:
+
+Used to determine whether a particular container is ready to receive requests or not.
+For ex- A container which serving a web-application, readiness mean that container has loaded all the static assets, database connection, started the webserver and opened a port to start serving request
+What happen if container fails its readiness probe ?
+
+Kubernetes controller will ensure that the pod doesn’t receive any requests.
+
+Readiness Probe States:
+
+Failure — is the default state until the readiness probe succeeds. 
+Success- The container will start receiving requests only after the readiness probe returns with the Success state. 
+
+Note:
+If no readiness probe is configured, the container will start receiving requests as soon as it starts.
+
+*************************************************************************************************************************************
+Creating a Pod Running a Container with a Readiness Probe
+vi readiness.yml
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: readiness-probe
+spec:
+  containers:
+  - name: ubuntu-container
+    image: ubuntu
+    command:
+        - /bin/bash
+        - -ec
+        - sleep 30; touch /tmp/ready; sleep 600
+    readinessProbe:
+       exec:
+         command:
+            - cat
+            - /tmp/ready
+       initialDelaySeconds: 10
+       periodSeconds: 5
+
+
+Pod configuration Description:
+
+Creating a container with ubuntu image
+When container starts it will sleep for 30 seconds and then create file /tmp/ready
+This means the file will be available only after 30 seconds
+In readiness configuration — It will try to find the file every 5 seconds with an initial delay of 10 seconds
+Create a pod
+
+kubectl create -f readiness-probe.yaml
+kubectl get pod readiness-probe
+kubectl describe pod readiness-probe
+o/p:
+Yow will see error probe failed .....
+
+Wait for a minute and then run the below command
+
+kubectl describe pod readiness-probe
+**************************************************************************************************************************************
+
+Note:
+Liveness Probes
+
+initialDelaySeconds : should be more then the application start up time so that container doesn’t get stuck in a restart Loop
+
+Readiness Probes
+
+initialDelaySeconds : could be small because we want to enable the traffic to the pod as soon as container is ready
+

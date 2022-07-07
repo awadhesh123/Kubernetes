@@ -33,6 +33,9 @@ kubectl exec -it ..... /bin/bash
    cat /tmp/healthy
    echo $?
    o                                      // 0 means success
+   
+   
+   cool
 
 Now, delete /tmp/healthy
 cat /tmp/healthy

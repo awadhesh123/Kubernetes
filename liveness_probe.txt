@@ -1,4 +1,4 @@
-**********************************Liveness Probe***********************************
+**********************************Liveness Probe**************************************************************************
 
 Example.1
 
@@ -35,7 +35,7 @@ kubectl exec -it ..... /bin/bash
    o                                      // 0 means success
    
    
-   cool
+ 
 
 Now, delete /tmp/healthy
 cat /tmp/healthy
